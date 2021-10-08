@@ -7,9 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import bootpay.example.capston_design.Utils.PurchaseAdapter;
 import bootpay.example.capston_design.Utils.PurchaseData;
+import bootpay.example.capston_design.Utils.PurchaseDetailAdapter;
+import bootpay.example.capston_design.Utils.PurchaseDetailData;
 import bootpay.example.capston_design.Utils.RecyclerDecoration_Height;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -17,9 +18,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
-import android.widget.TextView;
 
 import com.example.capston_design.R;
 
@@ -35,32 +34,32 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class Product_purchase_list extends AppCompatActivity {
+public class Purchase_detail_list extends AppCompatActivity {
 
     String IP_ADDRESS = "52.78.19.35";
     String TAG = "phptest";
 
+    // 상세 게시글의 게시글 번호다.
+    String o_id;
+
     Toolbar toolbar;
     RecyclerView recycler_view;
-    ArrayList<PurchaseData> mArrayList;
-    PurchaseAdapter mAdapter;
+    ArrayList<PurchaseDetailData> mArrayList;
+    PurchaseDetailAdapter mAdapter;
 
     //MySQL 에서 갖고온 데이터를 Json 형태로 담아오는 문자열
     String mJsonString;
-
-    //사용자 이름
-    String user_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_product_purchase_list);
+        setContentView(R.layout.activity_purchase_detail_list);
 
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         recycler_view=(RecyclerView)findViewById(R.id.recycler_view);
         setSupportActionBar(toolbar);
-        toolbar.setTitle("구매 내역");
+        toolbar.setTitle("상세 구매 내역");
         toolbar.setTitleTextColor(Color.BLACK);
         //툴바의 뒤로가기 버튼을 활성화 한다
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -68,48 +67,26 @@ public class Product_purchase_list extends AppCompatActivity {
         recycler_view.setLayoutManager(new LinearLayoutManager(this));
         mArrayList = new ArrayList<>();
 
-        mAdapter = new PurchaseAdapter(this, mArrayList);
+        mAdapter = new PurchaseDetailAdapter(this, mArrayList);
         recycler_view.setAdapter(mAdapter);
 
-        Intent intent=getIntent();
-        user_name=intent.getStringExtra("user_name");
+        Intent intent = getIntent();
+        o_id=intent.getStringExtra("o_id");
 
+        System.out.println("로그 확인");
+        System.out.println(o_id);
 
-        GetData task = new GetData();
-        task.execute( "http://" + IP_ADDRESS + "/getjson_orderInformation.php",user_name);
+        Purchase_detail_list.GetData_ProductDetail task = new Purchase_detail_list.GetData_ProductDetail();
+        task.execute( "http://" + IP_ADDRESS + "/getjson_orderDetailInformation.php",o_id);
 
         //아래 두 코드는 리사이클러뷰의 아이템 간격을 조절해주는 코드다.
         RecyclerDecoration_Height decoration_height = new RecyclerDecoration_Height(60);
         recycler_view.addItemDecoration(decoration_height);
         recycler_view.addItemDecoration(new DividerItemDecoration(getApplicationContext(), 1));
 
-        mAdapter.setOnItemClickListener(new PurchaseAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(PurchaseAdapter.CustomViewHolder_Purchase holder, View view, int position) {
-
-                Intent intent = new Intent(getApplicationContext(), Purchase_detail_list.class);
-                intent.putExtra("o_id",mArrayList.get(position).getOrder_number());
-
-                startActivity(intent);
-
-            }
-        });
-
     }
 
-
-
-    @Override
-    //좌측 상단의 왼쪽으로 향하는 화살표 버튼. 이전 화면으로 되돌아 간다.
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId()==android.R.id.home/*지정한 id*/){
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private class GetData extends AsyncTask<String, Void, String> {
+    private class GetData_ProductDetail extends AsyncTask<String, Void, String> {
 
         ProgressDialog progressDialog;
         String errorString = null;
@@ -118,7 +95,7 @@ public class Product_purchase_list extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDialog = ProgressDialog.show(Product_purchase_list.this,
+            progressDialog = ProgressDialog.show(Purchase_detail_list.this,
                     "데이터 로딩중입니다", null, true, true);
         }
 
@@ -146,11 +123,11 @@ public class Product_purchase_list extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
 
-            String name = (String)params[1];
+            String o_id = (String)params[1];
 
             String serverURL = params[0];
             //String postParameters = params[1];
-            String postParameters = "name=" + name;
+            String postParameters = "o_id=" + o_id;
 
 
             try {
@@ -211,15 +188,11 @@ public class Product_purchase_list extends AppCompatActivity {
     }
 
     private void showResult(){
-
         String TAG_JSON="webnautes";
-        String TAG_OID = "o_id";
-        String TAG_USER_NAME = "user_name";
-        String TAG_ADDRESS = "address";
-        String TAG_USER_PHONE = "user_phone";
-        String TAG_O_TIME = "o_time";
-        String TAG_STATUS = "status";
-        String TAG_O_TOTAL_PRICE ="o_total_price";
+        String TAG_PRODUCT_NAME = "product_name";
+        String TAG_O_QUANTITY = "o_quantity";
+        String TAG_P_PRICE = "p_price";
+        String TAG_IMAGE_URL = "image_url";
 
 
         try {
@@ -230,23 +203,26 @@ public class Product_purchase_list extends AppCompatActivity {
 
                 JSONObject item = jsonArray.getJSONObject(i);
 
-                String o_id = item.getString(TAG_OID);
-                String user_name = item.getString(TAG_USER_NAME);
-                String address = item.getString(TAG_ADDRESS);
-                String user_phone = item.getString(TAG_USER_PHONE);
-                String o_time = item.getString(TAG_O_TIME);
-                String status = item.getString(TAG_STATUS);
-                String o_total_price = item.getString(TAG_O_TOTAL_PRICE);
+                String product_name = item.getString(TAG_PRODUCT_NAME);
+                String o_quantity = item.getString(TAG_O_QUANTITY);
+                String p_price = item.getString(TAG_P_PRICE);
+                String image_url = item.getString(TAG_IMAGE_URL);
+
+                System.out.println("데이터 확인");
+                System.out.println(product_name);
+                System.out.println(o_quantity);
+                System.out.println(p_price);
+                System.out.println(image_url);
 
 
-                PurchaseData purchaseData = new PurchaseData();
+                PurchaseDetailData purchaseDetailData = new PurchaseDetailData();
 
-                purchaseData.setDeliver_status(status+"    ");
-                purchaseData.setOrder_time("결제 시간   "+o_time);
-                purchaseData.setTotal_price("총 금액 "+o_total_price+" 원");
-                purchaseData.setOrder_number(o_id);
+                purchaseDetailData.setProduct_name(product_name);
+                purchaseDetailData.setProduct_price("상품 가격 : "+p_price);
+                purchaseDetailData.setProduct_number("구매한 상품의 개수 "+o_quantity+"개");
+                purchaseDetailData.setProduct_img_url(image_url);
 
-                mArrayList.add(purchaseData);
+                mArrayList.add(purchaseDetailData);
                 mAdapter.notifyDataSetChanged();
             }
 
@@ -259,4 +235,15 @@ public class Product_purchase_list extends AppCompatActivity {
 
     }
 
+
+
+    @Override
+    //좌측 상단의 왼쪽으로 향하는 화살표 버튼. 이전 화면으로 되돌아 간다.
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==android.R.id.home/*지정한 id*/){
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

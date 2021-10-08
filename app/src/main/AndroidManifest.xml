@@ -10,12 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Capston_Design"
         android:usesCleartextTraffic="true">
-        <activity android:name="bootpay.example.capston_design.Product_purchase_list"></activity>
-        <activity android:name="bootpay.example.capston_design.Pay_Activity"></activity>
-        <activity android:name="bootpay.example.capston_design.WebViewActivity"></activity>
+        <activity android:name="bootpay.example.capston_design.Purchase_detail_list"></activity>
+        <activity android:name="bootpay.example.capston_design.Product_purchase_list" />
+        <activity android:name="bootpay.example.capston_design.Pay_Activity" />
+        <activity android:name="bootpay.example.capston_design.WebViewActivity" />
         <activity
             android:name="bootpay.example.capston_design.Detail_Information"
-            android:label="@string/title_activity_detail__information"></activity>
+            android:label="@string/title_activity_detail__information" />
         <activity
             android:name="bootpay.example.capston_design.MainActivity"
             android:windowSoftInputMode="adjustNothing">
@@ -35,11 +36,11 @@
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
     </application>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>

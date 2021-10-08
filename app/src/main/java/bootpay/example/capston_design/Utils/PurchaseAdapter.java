@@ -18,13 +18,20 @@ public class PurchaseAdapter extends RecyclerView.Adapter<PurchaseAdapter.Custom
     private ArrayList<PurchaseData> mList = null;
     private Activity context = null;
 
+    //리사이클러뷰의 각 아이템을 클릭할 수 있도록 선언한 객체다.
+    OnItemClickListener listener;
+
+    //아이템 클릭시 나타나는 이벤트 이 메소드를 사용해서 리사이클러뷰의 각 아이템에 접근할 수 있다.
+    public static interface  OnItemClickListener{
+        public void onItemClick(CustomViewHolder_Purchase holder,View view, int position);
+    }
 
     public PurchaseAdapter(Activity context, ArrayList<PurchaseData> list) {
         this.context = context;
         this.mList = list;
     }
 
-    class CustomViewHolder_Purchase extends RecyclerView.ViewHolder {
+    public class CustomViewHolder_Purchase extends RecyclerView.ViewHolder {
         //배송 상태를 표현한다.
         protected TextView deliver_status;
         //주문 날짜를 표현한다.
@@ -38,6 +45,15 @@ public class PurchaseAdapter extends RecyclerView.Adapter<PurchaseAdapter.Custom
             this.deliver_status = (TextView) view.findViewById(R.id.deliver_status);
             this.date = (TextView) view.findViewById(R.id.date);
             this.total_price = (TextView) view.findViewById(R.id.total_price);
+            itemView.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view){
+                    int position=getBindingAdapterPosition();
+                    if(listener != null){
+                        listener.onItemClick(CustomViewHolder_Purchase.this,view,position);
+                    }
+                }
+            }); //추가된 사항
         }
     }
 
@@ -53,9 +69,15 @@ public class PurchaseAdapter extends RecyclerView.Adapter<PurchaseAdapter.Custom
     @Override
     public void onBindViewHolder(@NonNull CustomViewHolder_Purchase viewholder, int position) {
 
+
         viewholder.deliver_status.setText(mList.get(position).getDeliver_status());
         viewholder.date.setText(mList.get(position).getOrder_time());
         viewholder.total_price.setText(mList.get(position).getTotal_price());
+    }
+
+    //아이템 클릭시 나타나는 이벤트 이 메소드를 사용해서 리사이클러뷰의 각 아이템에 접근할 수 있다.
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener=listener;
     }
 
     @Override

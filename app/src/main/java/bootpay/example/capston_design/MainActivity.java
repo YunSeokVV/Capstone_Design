@@ -221,6 +221,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Product_purchase_list.class);
+                intent.putExtra("user_name",user_name);
                 startActivity(intent);
             }
         });
