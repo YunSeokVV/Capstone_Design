@@ -48,6 +48,6 @@ public class WebViewActivity extends Activity {
             }
         });
 
-        browser.loadUrl("http://18.191.86.204/daum.html");
+        browser.loadUrl("http://52.78.19.35/daum.html");
     }
 }

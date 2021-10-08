@@ -56,6 +56,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
+
     private ArrayList<Dictionary> mArrayList;
     private CustomAdapter mAdapter;
 
@@ -86,6 +87,9 @@ public class MainActivity extends Activity {
     //선택 삭제를 표현하는 TextView 다. 사용자가 선택한 아이템들을 삭제할 수 있다.
     TextView delete_choosen;
 
+    // 구매내역을 표현하는 TextView 다.
+    TextView bought_page;
+
     //사용자의 배송지를 설정하는 TextView 이다.
     TextView textView;
 
@@ -102,6 +106,12 @@ public class MainActivity extends Activity {
     //사용자 전화번호
     String user_phone;
 
+    // 아래 두 변수는  '/' 구분자를 두고 서버로 데이터를 보낸다. '/' 를 기준으로 사용자가 어떤 상품을 몇개를 구매했는지 쉽게 파악할 수 있다.
+    // 소비자가 구매한 특정 상품을 몇개나 구매했는지 정보를 담기위한 변수다.
+    String item_count="";
+    // 소비자가 구매한 특정 상품의 이름이다
+    String item_name="";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +125,7 @@ public class MainActivity extends Activity {
 
         delete_choosen=(TextView)findViewById(R.id.textView3);
         button_pay=(Button)findViewById(R.id.button_pay);
+        bought_page=(TextView)findViewById(R.id.textView4);
 
         total_price=(TextView)findViewById(R.id.user_total_price);
 
@@ -136,15 +147,7 @@ public class MainActivity extends Activity {
 
 
 
-//        //사용자의 배송지를 설정하는 TextView 다. 클릭하면 Daum 주소설정 api 를 사용하게 된다.
-//        user_address.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                Intent i = new Intent(MainActivity.this, WebViewActivity.class);
-//                startActivityForResult(i, SEARCH_ADDRESS_ACTIVITY);
-//            }
-//        });
+
 
         //결제하기 버튼이다.
         button_pay.setOnClickListener(new View.OnClickListener() {
@@ -213,6 +216,15 @@ public class MainActivity extends Activity {
             }
         });
 
+        //'구매 내역' 버튼을 눌려서 사용자가 구매했던 상품들을 확인할 수 있다.
+        bought_page.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), Product_purchase_list.class);
+                startActivity(intent);
+            }
+        });
+
 
 //        //EditText 에 입력을 완료하고 나면 cursor 를 다시 disable 한다.
 //        detail_position.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -260,18 +272,21 @@ public class MainActivity extends Activity {
 
     //    //결제 기능 실행
     public void goRequest() {
-//        runOnUiThread();
 
-//        BootpayRestService
+        //todo : customer_total_price 변수 값이 0으로 초기화 되있다. 이를 방지하기 위해서 사용한 변수다. 변수값이 0이 되지 않게끔 고치면 이 변수도 쓰지 마라. task.execute 에서 그런 문제가 발생함.
+        String total_price =String.valueOf(customer_total_price);
 
-//        Spinner mySpinner = (Spinner) findViewById(R.id.your_spinner);
-//        String text = mySpinner.getSelectedItem().toString();
+
         BootUser bootUser = new BootUser().setPhone("010-1234-5678"); // 구매자 정보
         BootExtra bootExtra = new BootExtra().setQuotas(new int[] {0,2,3});  // 일시불, 2개월, 3개월 할부 허용, 할부는 최대 12개월까지 사용됨 (5만원 이상 구매시 할부허용 범위)
         Double price = 1000d;
         try {
             //price = Double.parseDouble(edit_price.getText().toString());    //edit_price = 결제금액
-            price = Double.parseDouble(String.valueOf(customer_total_price)); //금액 합계
+            price = Double.parseDouble(String.valueOf(100)); //금액 합계
+
+            System.out.println("데이터 확인");
+            System.out.println(customer_total_price);
+
         } catch (Exception e){}
 
 
@@ -326,14 +341,29 @@ public class MainActivity extends Activity {
                         Toast myToast = Toast.makeText(MainActivity.this,"결제가 완료되었습니다!!", Toast.LENGTH_SHORT);
                         myToast.show();
 
-                        //구매 완료후 제품목록을 전부 지운다.
+
+
                         for(int i=0;i<mArrayList.size();i++){
+                            item_count=item_count+String.valueOf(mArrayList.get(i).item_count)+"/";
+                            item_name=item_name+mArrayList.get(i).product_name+"/";
+                        }
+
+                        item_count=item_count.substring(0,item_count.length()-1);
+                        item_name=item_name.substring(0,item_name.length()-1);
+
+                        System.out.println("item_count 의 값");
+                        System.out.println(item_count);
+
+                        System.out.println("item_name 의 값");
+                        System.out.println(item_name);
+
+                        //구매 완료후 제품목록을 전부 지운다.
+                        for(int i=mArrayList.size()-1;i>=0;i--){
                                 mAdapter.RemoveItem(i,Integer.parseInt(mArrayList.get(i).getProduct_price()));
                         }
 
-                        InsertData task = new InsertData();
-                        //task.execute("http://" + IP_ADDRESS + "/insert.php", name,country);
-                        task.execute("http://" + "18.191.86.204/yoon_seok/insert.php", user_name,user_address,user_phone,String.valueOf(customer_total_price));
+                        InsertData_orders task = new InsertData_orders();
+                        task.execute("http://" + "52.78.19.35/yoon_seok/orders_detail_insert.php", user_name,user_address,user_phone,total_price,item_count,item_name);
 
                     }
                 })
@@ -354,7 +384,7 @@ public class MainActivity extends Activity {
                     public void onError(@Nullable String data) {
 
                         Toast.makeText(context, data, Toast.LENGTH_SHORT).show();
-                        Log.d("error", data);
+                        Log.d("error_log", data);
                     }
                 })
                 .onClose(
@@ -437,8 +467,8 @@ public class MainActivity extends Activity {
 
     }       //onActivityResult end
 
-    // MySQL 과 통신을 하기위한 AsyncTask
-    class InsertData extends AsyncTask<String, Void, String> {
+    // MySQL 과 통신을 하기위한 AsyncTask orders 테이블에 데이터를 추가하기위해 사용된다.
+    class InsertData_orders extends AsyncTask<String, Void, String> {
         ProgressDialog progressDialog;
 
         @Override
@@ -467,6 +497,8 @@ public class MainActivity extends Activity {
             String address = (String)params[2];
             String user_phone = (String)params[3];
             String o_total_price = (String)params[4];
+            String item_count = (String)params[5];
+            String item_name = (String)params[6];
 
             String serverURL = (String)params[0];
 
@@ -474,8 +506,10 @@ public class MainActivity extends Activity {
             Log.v("MainActivity","address "+address);
             Log.v("MainActivity","user_phone "+user_phone);
             Log.v("MainActivity","o_total_price "+o_total_price);
+            Log.v("MainActivity","item_count "+item_count);
+            Log.v("MainActivity","item_name "+item_name);
 
-            String postParameters = "user_name=" + user_name + "&address=" + address + "&user_phone=" + user_phone + "&o_total_price=" +o_total_price;
+            String postParameters = "user_name=" + user_name + "&address=" + address + "&user_phone=" + user_phone + "&o_total_price=" +o_total_price + "&item_count=" +item_count+"&item_name="+item_name;
 
 
             try {
@@ -527,12 +561,12 @@ public class MainActivity extends Activity {
 
             } catch (Exception e) {
 
-                Log.d("MainActivity", "InsertData: Error ", e);
+                Log.d("MainActivity", "InsertData_orders: Error ", e);
 
                 return new String("Error: " + e.getMessage());
             }
 
         }
-    }
+    }       //InsertData_orders 클래스 종료
 
 }
