@@ -82,6 +82,21 @@
 
 ![](https://private-user-images.githubusercontent.com/43668299/337859220-3d332044-1b17-4dfa-90b7-bcc3884d1510.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTc4MzI2MzAsIm5iZiI6MTcxNzgzMjMzMCwicGF0aCI6Ii80MzY2ODI5OS8zMzc4NTkyMjAtM2QzMzIwNDQtMWIxNy00ZGZhLTkwYjctYmNjMzg4NGQxNTEwLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA2MDglMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNjA4VDA3Mzg1MFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWUwOWI1YzZkNDYyMjIwZTE4MDNjYjExODM1ZDc0ZjdkZmIzMmJkZTc2ZGQ2MThhMWRjZWUzOTI2OGNmMDk4OTkmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.yDHtCpU1IMIe3Ni9OZNs-OY3a_3M2ecJBA4pW3rwXsk)
 
+**상품 QR코드** 
+- 기존의 방식이던 상품 바코드에 비해 QR코드는 담을 수 있는 정보의 양이 앞도적으로 많습니다. 그리고 바코드와 다르게 상하좌우 관계없이 인식할 수 있습니다.
+
+**소비자용 앱**
+- 앱을 활용하면 사용자는 따로 장바구니가 쇼핑카트를 들고 다니면서 물건을 챙기지 않아도 됩니다. 앱으로 구매할 상품을 설정하면 됩니다.
+  
+**결제 API (BootPay API)**
+- 소비자용앱에서 장바구니에 모아둔 상품들을 결제합니다.
+  
+**배송관리용 웹서버**
+- 소비자의 주문정보와 구매내역등을 저장하고 있는 웹서버입니다.
+  
+**관리자용 웹**
+- 소비자의 주문정보를 처리할 수 있는 관리자용 웹페이지입니다. 판매하고 있는 상품도 확인할 수 있습니다.
+
 # 4. 시연영상 링크
 
 https://www.youtube.com/watch?v=KgPOE8p0VKs
